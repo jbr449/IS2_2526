@@ -1,0 +1,8 @@
+es\unican\is2\persistencia\H2ServerConnectionManager.class
+es\unican\is2\persistencia\SeguroMapper.class
+es\unican\is2\persistencia\ClientesDAO.class
+es\unican\is2\persistencia\IClientesDAO.class
+es\unican\is2\persistencia\ClienteMapper.class
+es\unican\is2\persistencia\DataAccessException.class
+es\unican\is2\persistencia\SegurosDAO.class
+es\unican\is2\persistencia\ISegurosDAO.class

@@ -5,21 +5,23 @@
 
  <modelVersion>4.0.0</modelVersion>
 
- <groupId>es.unican.is2</groupId>
+ <parent>
+  <groupId>es.unican.is2</groupId>
+  <artifactId>practica2</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <relativePath>../pom.xml</relativePath>
+ </parent>
+
  <artifactId>persistencia</artifactId>
- <version>1.0-SNAPSHOT</version>
 
  <dependencies>
+
   <dependency>
    <groupId>es.unican.is2</groupId>
    <artifactId>modelo</artifactId>
    <version>1.0-SNAPSHOT</version>
   </dependency>
- </dependencies>
 
- <properties>
-  <maven.compiler.source>17</maven.compiler.source>
-  <maven.compiler.target>17</maven.compiler.target>
- </properties>
+ </dependencies>
 
 </project>
