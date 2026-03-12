@@ -1,4 +1,5 @@
 es\unican\is2\negocio\OperacionNoValida.class
 es\unican\is2\negocio\IInfoSeguros.class
 es\unican\is2\negocio\IGestionSeguros.class
+es\unican\is2\negocio\GestionSeguros.class
 es\unican\is2\negocio\IGestionClientes.class

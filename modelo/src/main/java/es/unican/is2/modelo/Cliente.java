@@ -10,11 +10,8 @@ import java.util.List;
 public class Cliente {
 
     private String dni;
-
     private String nombre;  
-    
     private boolean minusvalia;
-
     private List<Seguro> seguros = new LinkedList<Seguro>();
     
 	/**
@@ -80,7 +77,20 @@ public class Cliente {
      * todos los seguros a su nombre
      */
     public double totalSeguros() {
-        return 0;
+        double total = 0.0;
+        
+        // 1. Sumamos el precio de todos los seguros que tiene este cliente
+        for (Seguro s : seguros) {
+            total += s.precio(); // Aquí llama a las matemáticas que acabas de pegar en Seguro.java
+        }
+        
+        // 2. Si el cliente tiene minusvalía, le hacemos un 25% de descuento al total
+        if (minusvalia) {
+            total = total * 0.75;
+        }
+        
+        // Devolvemos el total redondeado a 2 decimales
+        return Math.round(total * 100.0) / 100.0;
     }
 
 }
