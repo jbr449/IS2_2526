@@ -17,7 +17,7 @@ import es.unican.is2.SegurosCommon.Cobertura;
 import es.unican.is2.SegurosCommon.DataAccessException;
 import es.unican.is2.SegurosCommon.Seguro;
 
-class DaoH2CoverageTest {
+class SegurosDAOH2Test {
 
     private ClientesDAO clientesDAO;
     private SegurosDAO segurosDAO;
