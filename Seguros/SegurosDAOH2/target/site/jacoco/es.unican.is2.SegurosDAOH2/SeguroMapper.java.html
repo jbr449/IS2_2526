@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SeguroMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SegurosDAOH2</a> &gt; <a href="index.source.html" class="el_package">es.unican.is2.SegurosDAOH2</a> &gt; <span class="el_source">SeguroMapper.java</span></div><h1>SeguroMapper.java</h1><pre class="source lang-java linenums">package es.unican.is2.SegurosDAOH2;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import es.unican.is2.SegurosCommon.Cobertura;
+import es.unican.is2.SegurosCommon.DataAccessException;
+import es.unican.is2.SegurosCommon.Seguro;
+
+/**
+ * Mapeador de filas SQL a objetos {@link Seguro}.
+ */
+public final class SeguroMapper {
+
+    private SeguroMapper() {
+    }
+
+    public static Seguro toSeguro(ResultSet results) throws DataAccessException {
+        try {
+<span class="fc" id="L19">            Seguro seg = new Seguro();</span>
+<span class="fc" id="L20">            seg.setId(results.getLong(&quot;id&quot;));</span>
+<span class="fc" id="L21">            seg.setMatricula(results.getString(&quot;matricula&quot;));</span>
+<span class="fc" id="L22">            seg.setFechaInicio(results.getDate(&quot;fechaInicio&quot;).toLocalDate());</span>
+<span class="fc" id="L23">            seg.setCobertura(Cobertura.valueOf(results.getString(&quot;cobertura&quot;)));</span>
+<span class="fc" id="L24">            seg.setPotencia(results.getInt(&quot;potencia&quot;));</span>
+<span class="fc" id="L25">            seg.setConductorAdicional(results.getString(&quot;conductorAdicional&quot;));</span>
+<span class="fc" id="L26">            return seg;</span>
+<span class="nc" id="L27">        } catch (SQLException e) {</span>
+<span class="nc" id="L28">            throw new DataAccessException(&quot;Error mapeando seguro&quot;, e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

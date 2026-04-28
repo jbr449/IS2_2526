@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SegurosDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SegurosDAOH2</a> &gt; <a href="index.source.html" class="el_package">es.unican.is2.SegurosDAOH2</a> &gt; <span class="el_source">SegurosDAO.java</span></div><h1>SegurosDAO.java</h1><pre class="source lang-java linenums">package es.unican.is2.SegurosDAOH2;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
+
+import es.unican.is2.SegurosCommon.DataAccessException;
+import es.unican.is2.SegurosCommon.ISegurosDAO;
+import es.unican.is2.SegurosCommon.Seguro;
+
+/**
+ * Implementación DAO para seguros sobre H2.
+ */
+<span class="fc" id="L17">public class SegurosDAO implements ISegurosDAO {</span>
+
+    @Override
+    public Seguro creaSeguro(Seguro s) throws DataAccessException {
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if (seguroPorMatricula(s.getMatricula()) != null) {</span>
+<span class="nc" id="L22">            return null;</span>
+        }
+
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">        String conductor = s.getConductorAdicional() == null</span>
+<span class="fc" id="L26">                ? &quot;NULL&quot;</span>
+<span class="pc" id="L27">                : &quot;'&quot; + escape(s.getConductorAdicional()) + &quot;'&quot;;</span>
+
+<span class="fc" id="L29">        String insertStatement = String.format(</span>
+                &quot;INSERT INTO Seguros(matricula, fechaInicio, cobertura, potencia, conductorAdicional) VALUES ('%s', '%s', '%s', %d, %s)&quot;,
+<span class="fc" id="L31">                escape(s.getMatricula()),</span>
+<span class="fc" id="L32">                s.getFechaInicio(),</span>
+<span class="fc" id="L33">                s.getCobertura(),</span>
+<span class="fc" id="L34">                s.getPotencia(),</span>
+                conductor);
+<span class="fc" id="L36">        H2ServerConnectionManager.executeSqlStatement(insertStatement);</span>
+<span class="fc" id="L37">        return seguroPorMatricula(s.getMatricula());</span>
+    }
+
+    @Override
+    public Seguro eliminaSeguro(long id) throws DataAccessException {
+<span class="fc" id="L42">        Seguro seguro = seguro(id);</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (seguro == null) {</span>
+<span class="nc" id="L44">            return null;</span>
+        }
+<span class="fc" id="L46">        H2ServerConnectionManager.executeSqlStatement(&quot;DELETE FROM Seguros WHERE id = &quot; + id);</span>
+<span class="fc" id="L47">        return seguro;</span>
+    }
+
+    @Override
+    public Seguro actualizaSeguro(Seguro nuevo) throws DataAccessException {
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (seguro(nuevo.getId()) == null) {</span>
+<span class="nc" id="L53">            return null;</span>
+        }
+
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        String conductor = nuevo.getConductorAdicional() == null</span>
+<span class="nc" id="L57">                ? &quot;NULL&quot;</span>
+<span class="fc" id="L58">                : &quot;'&quot; + escape(nuevo.getConductorAdicional()) + &quot;'&quot;;</span>
+
+<span class="fc" id="L60">        String statementText = String.format(</span>
+                &quot;UPDATE Seguros SET matricula='%s', fechaInicio='%s', cobertura='%s', potencia=%d, conductorAdicional=%s WHERE id=%d&quot;,
+<span class="fc" id="L62">                escape(nuevo.getMatricula()),</span>
+<span class="fc" id="L63">                nuevo.getFechaInicio(),</span>
+<span class="fc" id="L64">                nuevo.getCobertura(),</span>
+<span class="fc" id="L65">                nuevo.getPotencia(),</span>
+                conductor,
+<span class="fc" id="L67">                nuevo.getId());</span>
+<span class="fc" id="L68">        H2ServerConnectionManager.executeSqlStatement(statementText);</span>
+<span class="fc" id="L69">        return seguro(nuevo.getId());</span>
+    }
+
+    @Override
+    public Seguro seguro(long id) throws DataAccessException {
+<span class="fc" id="L74">        Connection con = H2ServerConnectionManager.getConnection();</span>
+<span class="fc" id="L75">        try (Statement statement = con.createStatement();</span>
+<span class="fc" id="L76">             ResultSet results = statement.executeQuery(</span>
+                     &quot;SELECT id, matricula, fechaInicio, cobertura, potencia, conductorAdicional, cliente_FK FROM Seguros WHERE id = &quot;
+                             + id)) {
+
+<span class="fc bfc" id="L80" title="All 2 branches covered.">            if (results.next()) {</span>
+<span class="fc" id="L81">                return SeguroMapper.toSeguro(results);</span>
+            }
+<span class="fc" id="L83">            return null;</span>
+<span class="pc bpc" id="L84" title="2 of 4 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L85">            throw new DataAccessException(&quot;Error recuperando seguro &quot; + id, e);</span>
+        }
+    }
+
+    @Override
+    public List&lt;Seguro&gt; seguros() throws DataAccessException {
+<span class="fc" id="L91">        List&lt;Seguro&gt; seguros = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L92">        Connection con = H2ServerConnectionManager.getConnection();</span>
+
+<span class="fc" id="L94">        try (Statement statement = con.createStatement();</span>
+<span class="fc" id="L95">             ResultSet results = statement.executeQuery(</span>
+                     &quot;SELECT id, matricula, fechaInicio, cobertura, potencia, conductorAdicional, cliente_FK FROM Seguros&quot;)) {
+
+<span class="fc bfc" id="L98" title="All 2 branches covered.">            while (results.next()) {</span>
+<span class="fc" id="L99">                seguros.add(SeguroMapper.toSeguro(results));</span>
+            }
+<span class="nc" id="L101">        } catch (SQLException e) {</span>
+<span class="nc" id="L102">            throw new DataAccessException(&quot;Error recuperando seguros&quot;, e);</span>
+<span class="fc" id="L103">        }</span>
+
+<span class="fc" id="L105">        return seguros;</span>
+    }
+
+    @Override
+    public Seguro seguroPorMatricula(String matricula) throws DataAccessException {
+<span class="fc" id="L110">        Connection con = H2ServerConnectionManager.getConnection();</span>
+<span class="fc" id="L111">        try (Statement statement = con.createStatement();</span>
+<span class="fc" id="L112">             ResultSet results = statement.executeQuery(</span>
+                     &quot;SELECT id, matricula, fechaInicio, cobertura, potencia, conductorAdicional, cliente_FK FROM Seguros WHERE matricula = '&quot;
+<span class="fc" id="L114">                             + escape(matricula) + &quot;'&quot;)) {</span>
+
+<span class="fc bfc" id="L116" title="All 2 branches covered.">            if (results.next()) {</span>
+<span class="fc" id="L117">                return SeguroMapper.toSeguro(results);</span>
+            }
+<span class="fc" id="L119">            return null;</span>
+<span class="pc bpc" id="L120" title="2 of 4 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L121">            throw new DataAccessException(&quot;Error recuperando seguro &quot; + matricula, e);</span>
+        }
+    }
+
+    private String escape(String value) {
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        return value == null ? &quot;&quot; : value.replace(&quot;'&quot;, &quot;''&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>H2ServerConnectionManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SegurosDAOH2</a> &gt; <a href="index.source.html" class="el_package">es.unican.is2.SegurosDAOH2</a> &gt; <span class="el_source">H2ServerConnectionManager.java</span></div><h1>H2ServerConnectionManager.java</h1><pre class="source lang-java linenums">package es.unican.is2.SegurosDAOH2;
+
+import es.unican.is2.SegurosCommon.DataAccessException;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.UUID;
+
+/**
+ * Clase que gestiona el acceso a la base de datos H2 en memoria.
+ */
+public final class H2ServerConnectionManager {
+
+    private static final String DB_URL = &quot;jdbc:h2:mem:test;DB_CLOSE_DELAY=-1&quot;;
+    private static final String DB_USER = &quot;sa&quot;;
+<span class="fc" id="L18">    private static final String DB_CREDENTIAL = UUID.randomUUID().toString();</span>
+
+    private static Connection connection;
+    private static boolean initialized;
+
+    private H2ServerConnectionManager() {
+    }
+
+    public static Connection getConnection() throws DataAccessException {
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (connection == null) {</span>
+            try {
+<span class="fc" id="L29">                connection = DriverManager.getConnection(DB_URL, DB_USER, DB_CREDENTIAL);</span>
+<span class="fc" id="L30">                cargaDatos();</span>
+<span class="nc" id="L31">            } catch (SQLException e) {</span>
+<span class="nc" id="L32">                throw new DataAccessException(&quot;Error al conectar con la base de datos&quot;, e);</span>
+<span class="fc" id="L33">            }</span>
+        }
+<span class="fc" id="L35">        return connection;</span>
+    }
+
+    public static void cargaDatos() throws DataAccessException {
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if (initialized) {</span>
+<span class="nc" id="L40">            return;</span>
+        }
+
+<span class="fc" id="L43">        try (Statement stm = getConnection().createStatement()) {</span>
+<span class="fc" id="L44">            String sql = &quot;&quot;&quot;</span>
+                    CREATE TABLE Clientes (
+                        dni CHAR(9) NOT NULL,
+                        nombre VARCHAR(100) NOT NULL,
+                        minusvalia BOOLEAN NOT NULL,
+                        PRIMARY KEY(dni)
+                    )
+                    &quot;&quot;&quot;;
+<span class="fc" id="L52">            stm.execute(sql);</span>
+
+<span class="fc" id="L54">            sql = &quot;&quot;&quot;</span>
+                    CREATE TABLE Seguros (
+                        id BIGINT NOT NULL AUTO_INCREMENT,
+                        matricula CHAR(7) NOT NULL,
+                        fechaInicio DATE NOT NULL,
+                        cobertura VARCHAR(100) NOT NULL,
+                        potencia INT NOT NULL,
+                        conductorAdicional VARCHAR(100),
+                        cliente_FK CHAR(9),
+                        PRIMARY KEY(id),
+                        FOREIGN KEY(cliente_FK) REFERENCES Clientes(dni)
+                    )
+                    &quot;&quot;&quot;;
+<span class="fc" id="L67">            stm.execute(sql);</span>
+
+<span class="fc" id="L69">            stm.executeUpdate(&quot;INSERT INTO Clientes (dni, nombre, minusvalia) VALUES ('11111111A', 'Juan', false)&quot;);</span>
+<span class="fc" id="L70">            stm.executeUpdate(&quot;INSERT INTO Clientes (dni, nombre, minusvalia) VALUES ('22222222A', 'Ana', false)&quot;);</span>
+<span class="fc" id="L71">            stm.executeUpdate(&quot;INSERT INTO Clientes (dni, nombre, minusvalia) VALUES ('33333333A', 'Luis', true)&quot;);</span>
+<span class="fc" id="L72">            stm.executeUpdate(&quot;INSERT INTO Clientes (dni, nombre, minusvalia) VALUES ('44444444A', 'Pepe', false)&quot;);</span>
+
+<span class="fc" id="L74">            stm.executeUpdate(&quot;INSERT INTO Seguros (matricula, fechaInicio, cobertura, potencia, cliente_FK) VALUES ('1111AAA', '2002-01-15', 'TERCEROS', 15, '11111111A')&quot;);</span>
+<span class="fc" id="L75">            stm.executeUpdate(&quot;INSERT INTO Seguros (matricula, fechaInicio, cobertura, potencia, conductorAdicional, cliente_FK) VALUES ('1111BBB', '2016-05-20', 'TODO_RIESGO', 20, 'Pepe', '11111111A')&quot;);</span>
+<span class="fc" id="L76">            stm.executeUpdate(&quot;INSERT INTO Seguros (matricula, fechaInicio, cobertura, potencia, cliente_FK) VALUES ('1111CCC', '2022-05-21', 'TERCEROS', 100, '11111111A')&quot;);</span>
+<span class="fc" id="L77">            stm.executeUpdate(&quot;INSERT INTO Seguros (matricula, fechaInicio, cobertura, potencia, cliente_FK) VALUES ('2222AAA', '2010-06-01', 'TERCEROS_LUNAS', 25, '22222222A')&quot;);</span>
+<span class="fc" id="L78">            stm.executeUpdate(&quot;INSERT INTO Seguros (matricula, fechaInicio, cobertura, potencia, cliente_FK) VALUES ('4444AAA', '2024-01-02', 'TERCEROS', 40, '44444444A')&quot;);</span>
+<span class="fc" id="L79">            stm.executeUpdate(&quot;INSERT INTO Seguros (matricula, fechaInicio, cobertura, potencia, cliente_FK) VALUES ('4444BBB', '2024-01-02', 'TERCEROS_LUNAS', 300, '44444444A')&quot;);</span>
+
+<span class="fc" id="L81">            initialized = true;</span>
+<span class="nc" id="L82">        } catch (SQLException e) {</span>
+<span class="nc" id="L83">            throw new DataAccessException(&quot;Error al crear la base de datos&quot;, e);</span>
+<span class="fc" id="L84">        }</span>
+<span class="fc" id="L85">    }</span>
+
+    public static void executeSqlStatement(String stringStatement) throws DataAccessException {
+<span class="fc" id="L88">        try (Statement stm = getConnection().createStatement()) {</span>
+<span class="fc" id="L89">            stm.execute(stringStatement);</span>
+<span class="nc" id="L90">        } catch (SQLException e) {</span>
+<span class="nc" id="L91">            throw new DataAccessException(&quot;Error ejecutando SQL&quot;, e);</span>
+<span class="fc" id="L92">        }</span>
+<span class="fc" id="L93">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

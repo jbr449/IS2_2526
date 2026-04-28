@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientesDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SegurosDAOH2</a> &gt; <a href="index.source.html" class="el_package">es.unican.is2.SegurosDAOH2</a> &gt; <span class="el_source">ClientesDAO.java</span></div><h1>ClientesDAO.java</h1><pre class="source lang-java linenums">package es.unican.is2.SegurosDAOH2;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import es.unican.is2.SegurosCommon.Cliente;
+import es.unican.is2.SegurosCommon.DataAccessException;
+import es.unican.is2.SegurosCommon.IClientesDAO;
+import es.unican.is2.SegurosCommon.Seguro;
+
+/**
+ * Implementación DAO para clientes sobre H2.
+ */
+<span class="fc" id="L20">public class ClientesDAO implements IClientesDAO {</span>
+
+    @Override
+    public Cliente creaCliente(Cliente c) throws DataAccessException {
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if (cliente(c.getDni()) != null) {</span>
+<span class="nc" id="L25">            return null;</span>
+        }
+
+<span class="fc" id="L28">        String insertStatement = String.format(</span>
+                &quot;INSERT INTO Clientes(dni, nombre, minusvalia) VALUES ('%s','%s',%s)&quot;,
+<span class="fc" id="L30">                escape(c.getDni()),</span>
+<span class="fc" id="L31">                escape(c.getNombre()),</span>
+<span class="fc" id="L32">                c.getMinusvalia());</span>
+
+<span class="fc" id="L34">        H2ServerConnectionManager.executeSqlStatement(insertStatement);</span>
+<span class="fc" id="L35">        return cliente(c.getDni());</span>
+    }
+
+    @Override
+    public Cliente cliente(String dni) throws DataAccessException {
+<span class="fc" id="L40">        Cliente result = null;</span>
+<span class="fc" id="L41">        Connection con = H2ServerConnectionManager.getConnection();</span>
+
+<span class="fc" id="L43">        try (Statement statement = con.createStatement();</span>
+<span class="fc" id="L44">             ResultSet results = statement.executeQuery(</span>
+<span class="fc" id="L45">                     &quot;SELECT dni, nombre, minusvalia FROM Clientes WHERE dni = '&quot; + escape(dni) + &quot;'&quot;)) {</span>
+
+<span class="fc bfc" id="L47" title="All 2 branches covered.">            if (results.next()) {</span>
+<span class="fc" id="L48">                result = procesaCliente(con, results);</span>
+            }
+<span class="nc" id="L50">        } catch (SQLException e) {</span>
+<span class="nc" id="L51">            throw new DataAccessException(&quot;Error recuperando cliente &quot; + dni, e);</span>
+<span class="fc" id="L52">        }</span>
+
+<span class="fc" id="L54">        return result;</span>
+    }
+
+    @Override
+    public Cliente actualizaCliente(Cliente nuevo) throws DataAccessException {
+<span class="fc" id="L59">        Cliente old = cliente(nuevo.getDni());</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (old == null) {</span>
+<span class="nc" id="L61">            return null;</span>
+        }
+
+<span class="fc" id="L64">        String statementText = String.format(</span>
+                &quot;UPDATE Clientes SET nombre='%s', minusvalia=%s WHERE dni='%s'&quot;,
+<span class="fc" id="L66">                escape(nuevo.getNombre()),</span>
+<span class="fc" id="L67">                nuevo.getMinusvalia(),</span>
+<span class="fc" id="L68">                escape(nuevo.getDni()));</span>
+<span class="fc" id="L69">        H2ServerConnectionManager.executeSqlStatement(statementText);</span>
+
+<span class="fc" id="L71">        Set&lt;String&gt; segurosAntiguos = old.getSeguros().stream()</span>
+<span class="fc" id="L72">                .map(Seguro::getMatricula)</span>
+<span class="fc" id="L73">                .collect(Collectors.toSet());</span>
+<span class="fc" id="L74">        Set&lt;String&gt; segurosNuevos = nuevo.getSeguros().stream()</span>
+<span class="fc" id="L75">                .map(Seguro::getMatricula)</span>
+<span class="fc" id="L76">                .collect(Collectors.toSet());</span>
+
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for (Seguro seguro : nuevo.getSeguros()) {</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">            if (!segurosAntiguos.contains(seguro.getMatricula())) {</span>
+<span class="fc" id="L80">                String sql = String.format(</span>
+                        &quot;UPDATE Seguros SET cliente_FK = '%s' WHERE id = %d&quot;,
+<span class="fc" id="L82">                        escape(nuevo.getDni()),</span>
+<span class="fc" id="L83">                        seguro.getId());</span>
+<span class="fc" id="L84">                H2ServerConnectionManager.executeSqlStatement(sql);</span>
+            }
+<span class="fc" id="L86">        }</span>
+
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        for (Seguro seguro : old.getSeguros()) {</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">            if (!segurosNuevos.contains(seguro.getMatricula())) {</span>
+<span class="fc" id="L90">                String sql = String.format(</span>
+                        &quot;UPDATE Seguros SET cliente_FK = NULL WHERE id = %d&quot;,
+<span class="fc" id="L92">                        seguro.getId());</span>
+<span class="fc" id="L93">                H2ServerConnectionManager.executeSqlStatement(sql);</span>
+            }
+<span class="fc" id="L95">        }</span>
+
+<span class="fc" id="L97">        return cliente(nuevo.getDni());</span>
+    }
+
+    @Override
+    public Cliente eliminaCliente(String dni) throws DataAccessException {
+<span class="fc" id="L102">        Cliente cliente = cliente(dni);</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (cliente == null) {</span>
+<span class="nc" id="L104">            return null;</span>
+        }
+
+<span class="fc" id="L107">        H2ServerConnectionManager.executeSqlStatement(</span>
+<span class="fc" id="L108">                &quot;DELETE FROM Clientes WHERE dni = '&quot; + escape(dni) + &quot;'&quot;);</span>
+<span class="fc" id="L109">        return cliente;</span>
+    }
+
+    @Override
+    public List&lt;Cliente&gt; clientes() throws DataAccessException {
+<span class="fc" id="L114">        List&lt;Cliente&gt; clientes = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L115">        Connection con = H2ServerConnectionManager.getConnection();</span>
+
+<span class="fc" id="L117">        try (Statement statement = con.createStatement();</span>
+<span class="fc" id="L118">             ResultSet results = statement.executeQuery(&quot;SELECT dni, nombre, minusvalia FROM Clientes&quot;)) {</span>
+
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            while (results.next()) {</span>
+<span class="fc" id="L121">                clientes.add(procesaCliente(con, results));</span>
+            }
+<span class="nc" id="L123">        } catch (SQLException e) {</span>
+<span class="nc" id="L124">            throw new DataAccessException(&quot;Error recuperando clientes&quot;, e);</span>
+<span class="fc" id="L125">        }</span>
+
+<span class="fc" id="L127">        return clientes;</span>
+    }
+
+    private Cliente procesaCliente(Connection con, ResultSet results)
+            throws SQLException, DataAccessException {
+<span class="fc" id="L132">        Cliente result = ClienteMapper.toCliente(results);</span>
+
+<span class="fc" id="L134">        try (Statement statement = con.createStatement();</span>
+<span class="fc" id="L135">             ResultSet seguros = statement.executeQuery(</span>
+                     &quot;SELECT id, matricula, fechaInicio, cobertura, potencia, conductorAdicional, cliente_FK FROM Seguros WHERE cliente_FK = '&quot;
+<span class="fc" id="L137">                             + escape(result.getDni()) + &quot;'&quot;)) {</span>
+
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            while (seguros.next()) {</span>
+<span class="fc" id="L140">                result.getSeguros().add(SeguroMapper.toSeguro(seguros));</span>
+            }
+        }
+
+<span class="fc" id="L144">        return result;</span>
+    }
+
+    private String escape(String value) {
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        return value == null ? &quot;&quot; : value.replace(&quot;'&quot;, &quot;''&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Cliente.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SegurosCommon</a> &gt; <a href="index.source.html" class="el_package">es.unican.is2.SegurosCommon</a> &gt; <span class="el_source">Cliente.java</span></div><h1>Cliente.java</h1><pre class="source lang-java linenums">package es.unican.is2.SegurosCommon;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Clase que representa un cliente de la empresa de seguros.
+ */
+public class Cliente {
+
+    private String dni;
+    private String nombre;
+    private boolean minusvalia;
+<span class="fc" id="L15">    private List&lt;Seguro&gt; seguros = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L17">    public Cliente() {</span>
+<span class="fc" id="L18">    }</span>
+
+    public Cliente(String dni, String nombre, boolean minusvalia) {
+<span class="fc" id="L21">        this(dni, nombre, minusvalia, new LinkedList&lt;&gt;());</span>
+<span class="fc" id="L22">    }</span>
+
+<span class="fc" id="L24">    public Cliente(String dni, String nombre, boolean minusvalia, List&lt;Seguro&gt; seguros) {</span>
+<span class="fc" id="L25">        this.dni = dni;</span>
+<span class="fc" id="L26">        this.nombre = nombre;</span>
+<span class="fc" id="L27">        this.minusvalia = minusvalia;</span>
+<span class="fc" id="L28">        setSeguros(seguros);</span>
+<span class="fc" id="L29">    }</span>
+
+    public List&lt;Seguro&gt; getSeguros() {
+<span class="fc" id="L32">        return seguros;</span>
+    }
+
+    public void setSeguros(List&lt;Seguro&gt; seguros) {
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        this.seguros = seguros == null ? new LinkedList&lt;&gt;() : new LinkedList&lt;&gt;(seguros);</span>
+<span class="fc" id="L37">    }</span>
+
+    public String getNombre() {
+<span class="fc" id="L40">        return nombre;</span>
+    }
+
+    public void setNombre(String nombre) {
+<span class="nc" id="L44">        this.nombre = nombre;</span>
+<span class="nc" id="L45">    }</span>
+
+    public String getDni() {
+<span class="fc" id="L48">        return dni;</span>
+    }
+
+    public void setDni(String dni) {
+<span class="nc" id="L52">        this.dni = dni;</span>
+<span class="nc" id="L53">    }</span>
+
+    public boolean getMinusvalia() {
+<span class="fc" id="L56">        return minusvalia;</span>
+    }
+
+    public void setMinusvalia(boolean minusvalia) {
+<span class="nc" id="L60">        this.minusvalia = minusvalia;</span>
+<span class="nc" id="L61">    }</span>
+
+    /**
+     * Calcula el total a pagar por el cliente por todos los seguros a su nombre.
+     */
+    public double totalSeguros() {
+<span class="fc" id="L67">        double total = 0.0;</span>
+
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        for (Seguro seguro : seguros) {</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            if (seguro != null) {</span>
+<span class="fc" id="L71">                total += seguro.precio();</span>
+            }
+<span class="fc" id="L73">        }</span>
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (minusvalia) {</span>
+<span class="fc" id="L76">            total *= 0.75;</span>
+        }
+
+<span class="fc" id="L79">        return Math.round(total * 100.0) / 100.0;</span>
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L85">            return true;</span>
+        }
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if (!(obj instanceof Cliente other)) {</span>
+<span class="nc" id="L88">            return false;</span>
+        }
+<span class="fc" id="L90">        return Objects.equals(dni, other.dni);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L95">        return Objects.hash(dni);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
